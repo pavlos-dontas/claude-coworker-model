@@ -7,7 +7,7 @@ Offload bulk I/O from Claude Code to cheap LLMs. Save thousands of tokens on fil
 ## Quick Start
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/claude-coworker-model.git
+git clone https://github.com/imkunal007219/claude-coworker-model.git
 cd claude-coworker-model
 ./setup.sh
 
