@@ -22,7 +22,7 @@
 
         # Worker model through OpenRouter
         export WORKER_BASE_URL="https://openrouter.ai/api/v1"
-        export WORKER_MODEL="deepseek/deepseek-chat-v3.1"
+        export WORKER_MODEL="deepseek/deepseek-v4-flash"
 
         echo "Set WORKER_API_KEY before use:"
         echo "  export WORKER_API_KEY=sk-or-..."
