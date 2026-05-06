@@ -27,8 +27,8 @@ pip install --quiet -r "${SCRIPT_DIR}/requirements.txt"
 echo "[3/4] Installing tools to ${BIN_DIR}..."
 mkdir -p "${BIN_DIR}"
 
-# ask-kimi and kimi-write need the venv (openai package)
-for tool in ask-kimi kimi-write; do
+# ask-worker and worker-write need the venv (openai package)
+for tool in ask-worker worker-write; do
     sed "1s|#!/usr/bin/env python3|#!${VENV_PYTHON}|" \
         "${SCRIPT_DIR}/tools/${tool}" > "${BIN_DIR}/${tool}"
     chmod +x "${BIN_DIR}/${tool}"
@@ -42,14 +42,19 @@ echo "  ✓ extract-chat (stdlib only)"
 
 # 4. Check API key
 echo "[4/4] Checking environment..."
-if [ -z "${WORKER_API_KEY:-}" ] && [ -z "${MOONSHOT_API_KEY:-}" ]; then
+if [ -z "${WORKER_API_KEY:-}" ]; then
     echo ""
-    echo "⚠  No API key found. Set one of these in your shell profile:"
+    echo "⚠  No API key found. Set these in your shell profile:"
     echo ""
-    echo "  # Kimi (Moonshot AI)"
+    echo "  # OpenAI"
     echo "  export WORKER_API_KEY=\"your-key-here\""
-    echo "  export WORKER_BASE_URL=\"https://api.moonshot.ai/v1\""
-    echo "  export WORKER_MODEL=\"kimi-k2.5\""
+    echo "  export WORKER_BASE_URL=\"https://api.openai.com/v1\""
+    echo "  export WORKER_MODEL=\"gpt-4o-mini\""
+    echo ""
+    echo "  # OR OpenRouter (access many models)"
+    echo "  export WORKER_API_KEY=\"your-key-here\""
+    echo "  export WORKER_BASE_URL=\"https://openrouter.ai/api/v1\""
+    echo "  export WORKER_MODEL=\"google/gemini-flash-1.5\""
     echo ""
     echo "  # OR DeepSeek"
     echo "  export WORKER_API_KEY=\"your-key-here\""
@@ -68,6 +73,6 @@ echo ""
 echo "=== Done! ==="
 echo ""
 echo "Make sure ${BIN_DIR} is on your PATH, then try:"
-echo "  ask-kimi --paths some_file.py --question 'what does this do?'"
+echo "  ask-worker --paths some_file.py --question 'what does this do?'"
 echo ""
 echo "Copy CLAUDE.md.template into your project's CLAUDE.md for auto-routing."

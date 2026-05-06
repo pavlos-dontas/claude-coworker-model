@@ -12,10 +12,10 @@ cd claude-coworker-model
 ./setup.sh
 
 export WORKER_API_KEY="your-key"
-export WORKER_BASE_URL="https://api.moonshot.ai/v1"
-export WORKER_MODEL="kimi-k2.5"
+export WORKER_BASE_URL="https://api.openai.com/v1"
+export WORKER_MODEL="gpt-4o-mini"
 
-ask-kimi --paths src/*.py --question "Find all SQL injection risks"
+ask-worker --paths src/*.py --question "Find all SQL injection risks"
 ```
 
 ## How It Works
@@ -35,16 +35,23 @@ Three environment variables configure any OpenAI-compatible provider:
 | Variable | Purpose | Example |
 |----------|---------|---------|
 | `WORKER_API_KEY` | API authentication | `sk-abc123` |
-| `WORKER_BASE_URL` | Provider endpoint | `https://api.moonshot.ai/v1` |
-| `WORKER_MODEL` | Model identifier | `kimi-k2.5` |
+| `WORKER_BASE_URL` | Provider endpoint | `https://api.openai.com/v1` |
+| `WORKER_MODEL` | Model identifier | `gpt-4o-mini` |
 
 ## Provider Examples
 
-**Kimi (Moonshot AI)**
+**OpenAI**
 ```bash
-export WORKER_API_KEY="$MOONSHOT_API_KEY"
-export WORKER_BASE_URL="https://api.moonshot.ai/v1"
-export WORKER_MODEL="kimi-k2.5"
+export WORKER_API_KEY="$OPENAI_API_KEY"
+export WORKER_BASE_URL="https://api.openai.com/v1"
+export WORKER_MODEL="gpt-4o-mini"
+```
+
+**OpenRouter** (access hundreds of models)
+```bash
+export WORKER_API_KEY="$OPENROUTER_API_KEY"
+export WORKER_BASE_URL="https://openrouter.ai/api/v1"
+export WORKER_MODEL="google/gemini-flash-1.5"
 ```
 
 **DeepSeek**
@@ -63,18 +70,18 @@ export WORKER_MODEL="qwen2.5-coder:14b"
 
 ## Tools
 
-### ask-kimi
+### ask-worker
 Delegate bulk reading to the worker model. Returns structured bullets, not prose.
 
 ```bash
 # Analyze multiple files for security issues
-ask-kimi \
+ask-worker \
   --paths auth.py database.py utils.py \
   --question "Identify all unvalidated inputs" \
   --max-tokens 8192
 
 # Generate API documentation from source
-ask-kimi \
+ask-worker \
   --paths src/**/*.ts \
   --question "List all exported functions with their arguments"
 ```
@@ -85,18 +92,18 @@ Flags:
 - `--max-tokens`: Total budget including reasoning tokens
 - `--model`: Override `WORKER_MODEL`
 
-### kimi-write
+### worker-write
 Generate code or documentation using an existing file as a style reference.
 
 ```bash
 # Generate tests matching existing style
-kimi-write \
+worker-write \
   --spec "Write pytest tests for auth.py covering OAuth2 flow" \
   --context tests/test_main.py \
   --target tests/test_auth.py
 
 # Create API docs matching current format
-kimi-write \
+worker-write \
   --spec "Document the new /v2/users endpoint" \
   --context docs/endpoints.md \
   --target docs/endpoints_v2.md
@@ -118,9 +125,9 @@ extract-chat ~/.claude/projects/my-project/session.jsonl
 # Write to file
 extract-chat ~/.claude/projects/my-project/session.jsonl -o /tmp/chat.txt
 
-# Pipe to ask-kimi for doc updates
+# Pipe to ask-worker for doc updates
 extract-chat session.jsonl -o /tmp/chat.txt && \
-  ask-kimi --paths /tmp/chat.txt docs/README.md --question "What doc updates are needed?"
+  ask-worker --paths /tmp/chat.txt docs/README.md --question "What doc updates are needed?"
 ```
 
 ## CLAUDE.md Setup
@@ -131,10 +138,10 @@ Copy `CLAUDE.md.template` to your project root as `CLAUDE.md`. This provides rou
 ## Worker Delegation Rules
 
 When asked to analyze, summarize, or search across multiple files:
-DELEGATE to ask-kimi with relevant file paths.
+DELEGATE to ask-worker with relevant file paths.
 
 When asked to generate boilerplate, tests, or documentation:
-DELEGATE to kimi-write with appropriate reference files.
+DELEGATE to worker-write with appropriate reference files.
 
 When asked to review session history:
 DELEGATE to extract-chat.

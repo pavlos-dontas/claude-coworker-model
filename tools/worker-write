@@ -1,24 +1,20 @@
 #!/usr/bin/env python3
-"""Delegate boilerplate generation to Kimi K2.5.
-
-Kimi K2.5 is a thinking model — it uses reasoning tokens internally.
-max-tokens must be high enough to cover both reasoning + output code.
-"""
+"""Delegate boilerplate generation to a cheap worker model."""
 import argparse, os, sys, pathlib
 from openai import OpenAI
 
 client = OpenAI(
-    api_key=os.environ.get("WORKER_API_KEY", os.environ.get("MOONSHOT_API_KEY", "")),
-    base_url=os.environ.get("WORKER_BASE_URL", "https://api.moonshot.ai/v1"),
+    api_key=os.environ.get("WORKER_API_KEY", ""),
+    base_url=os.environ.get("WORKER_BASE_URL", "https://api.openai.com/v1"),
 )
 
-p = argparse.ArgumentParser(description="Ask Kimi to generate code/docs")
+p = argparse.ArgumentParser(description="Ask worker model to generate code/docs")
 p.add_argument("--spec", required=True, help="What to write")
 p.add_argument("--context", help="Optional reference file for style/imports")
 p.add_argument("--target", required=True, help="Output file path")
 p.add_argument("--max-tokens", type=int, default=16384,
                help="Total token budget (reasoning + output)")
-p.add_argument("--model", default=os.environ.get("WORKER_MODEL", "kimi-k2.5"))
+p.add_argument("--model", default=os.environ.get("WORKER_MODEL", "gpt-4o-mini"))
 args = p.parse_args()
 
 ctx = ""
@@ -40,11 +36,11 @@ resp = client.chat.completions.create(
 
 content = resp.choices[0].message.content
 if not content:
-    print("[ERROR: Kimi ran out of tokens during reasoning. "
+    print("[ERROR: Worker model ran out of tokens during reasoning. "
           "Try --max-tokens 32768]", file=sys.stderr)
     sys.exit(1)
 
-# Strip accidental markdown fences if Kimi adds them
+# Strip accidental markdown fences
 if content.startswith("```"):
     content = content.split("\n", 1)[1].rsplit("```", 1)[0]
 
@@ -54,6 +50,6 @@ with open(args.target, "w") as f:
 print(f"Wrote {args.target} ({len(content)} chars)")
 u = resp.usage
 cached = getattr(getattr(u, 'prompt_tokens_details', None), 'cached_tokens', 0) or 0
-print(f"[kimi: {u.prompt_tokens} in ({cached} cached) / "
+print(f"[worker: {u.prompt_tokens} in ({cached} cached) / "
       f"{u.completion_tokens} out | finish: {resp.choices[0].finish_reason}]",
       file=sys.stderr)
